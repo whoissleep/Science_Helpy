@@ -1,6 +1,11 @@
 import faiss
 import psycopg2
 import numpy as np
+from read_and_preprocc_pdf import add_vectors_to_chunks, read_and_preprocc_some_text
+from tqdm import tqdm
+import os
+
+path_to_pdfs = "/home/whoissleep/Документы/VS_CODE/proj/pdfs"
 
 class PostgreDB:
     def __init__(self, dbname: str, user: str, password: str):
@@ -48,7 +53,7 @@ class PostgreDB:
         self.conn.commit()
         print("[INFO] DB IS CREATED!!!")
 
-    def insert_data(self, text, vectors):
+    def insert_data(self, dict_of_data):
         """
         Inserts the provided text and vectors into the TextVectors table.
 
@@ -58,6 +63,10 @@ class PostgreDB:
 
         This method commits the transaction after the insertion.
         """
+        text = list(dict_of_data['text'])
+        vectors = dict_of_data['vectors']
+        vectors = [[vector.tolist() for vector in sublist] for sublist in vectors]
+
         cursor = self.conn.cursor()
         cursor.execute(
             """
@@ -87,6 +96,32 @@ class PostgreDB:
         cursor.close()
         return rows
     
+    def close_connection(self):
+        """
+        Closes the connection to the database.
+
+        This method does not return anything, but prints a message to the console when the connection is closed.
+        """
+        self.conn.close()
+        print("[INFO] CONNECTION CLOSED!!!")
+
+    
 
 ###TEST PLACE
 ###DONT USE THIS CODE IF IT DONT HAVE "DONE AND READY FOR PROD"
+
+    def add_to_db(self, num_of_docs):
+        df = {"text": [], "vectors": []}
+
+        for i in range(num_of_docs):
+            pdf = read_and_preprocc_some_text(os.path.join(path_to_pdfs, f"{i + 1}.pdf"))
+            pdf = add_vectors_to_chunks(pdf)
+            for j in tqdm(range(len(pdf))):
+                text_chunks = []
+                vector_chunks = []
+                text_chunks.append(pdf[j]['sents_chunks'])
+                vector_chunks.append(pdf[j]['vectors'])
+                df['text'].append(text_chunks)
+                df['vectors'].append(vector_chunks)
+        
+            PostgreDB.insert_data(self, df)

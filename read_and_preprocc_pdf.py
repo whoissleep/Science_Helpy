@@ -90,12 +90,7 @@ def read_and_preprocc_some_text(path_to_pdf: str, num_of_chunks: int=5) -> list[
 
     return pdf_chunks
 
-###TEST PLACE
-###DONT USE THIS CODE IF IT DONT HAVE "DONE AND READY FOR PROD"
-
-#DONE AND READY FOR PROD
-def READY_add_vectors_to_chunks(pdf_chunks: list[dict]) -> list[dict]:
-    num_of_chunks = len(pdf_chunks)
+def add_vectors_to_chunks(pdf_chunks: list[dict]) -> list[dict]:
     vectorizer = Vectorizer()
     df = pd.DataFrame(pdf_chunks)
 
@@ -104,3 +99,8 @@ def READY_add_vectors_to_chunks(pdf_chunks: list[dict]) -> list[dict]:
     pdf_chunks = df.to_dict(orient='records')
 
     return pdf_chunks
+
+
+###TEST PLACE
+###DONT USE THIS CODE IF IT DONT HAVE "DONE AND READY FOR PROD"
+    
