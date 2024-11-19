@@ -36,7 +36,7 @@ def download_all_papers():
                 print(f"Can't download. Status code: {response.status_code}")
                 continue
         else:
-            print(f"[INFO ]File {i} in path: {path} is downloaded!")
+            print(f"[INFO] File {i} in path: {path} is downloaded!")
 
 
 ###TEST PLACE

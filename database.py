@@ -4,21 +4,25 @@ import numpy as np
 from read_and_preprocc_pdf import add_vectors_to_chunks, read_and_preprocc_some_text
 from tqdm import tqdm
 import os
+import pandas as pd
+
+def faiss_vectors():
+    pass
 
 path_to_pdfs = "/home/whoissleep/Документы/VS_CODE/proj/pdfs"
 
 class PostgreDB:
     def __init__(self, dbname: str, user: str, password: str):
         """
-    Initializes a connection to a PostgreSQL database.
+        Initializes a connection to a PostgreSQL database.
 
-    Args:
-        dbname (str): The name of the database.
-        user (str): The username used to authenticate.
-        password (str): The password used to authenticate.
+        Args:
+            dbname (str): The name of the database.
+            user (str): The username used to authenticate.
+            password (str): The password used to authenticate.
 
-    Attributes:
-        conn (psycopg2.connection): The connection object to the PostgreSQL database.
+        Attributes:
+            conn (psycopg2.connection): The connection object to the PostgreSQL database.
         """
         self.conn = psycopg2.connect(
             dbname=dbname,
@@ -63,18 +67,16 @@ class PostgreDB:
 
         This method commits the transaction after the insertion.
         """
-        text = list(dict_of_data['text'])
+        text = dict_of_data['text']
         vectors = dict_of_data['vectors']
         vectors = [[vector.tolist() for vector in sublist] for sublist in vectors]
 
         cursor = self.conn.cursor()
-        cursor.execute(
-            """
-            INSERT INTO TextVectors (text, vectors)
-            VALUES (%s, %s)
-            """,
-            (text, vectors)
-        )
+        for t, v in zip(text, vectors):
+            cursor.execute(
+                "INSERT INTO TextVectors (text, vectors) VALUES (%s, %s)",
+                ([t], v)
+            )
         self.conn.commit()
         cursor.close()
 
@@ -94,8 +96,9 @@ class PostgreDB:
         )
         rows = cursor.fetchall()
         cursor.close()
+
         return rows
-    
+        
     def close_connection(self):
         """
         Closes the connection to the database.
@@ -105,11 +108,6 @@ class PostgreDB:
         self.conn.close()
         print("[INFO] CONNECTION CLOSED!!!")
 
-    
-
-###TEST PLACE
-###DONT USE THIS CODE IF IT DONT HAVE "DONE AND READY FOR PROD"
-
     def add_to_db(self, num_of_docs):
         df = {"text": [], "vectors": []}
 
@@ -117,11 +115,21 @@ class PostgreDB:
             pdf = read_and_preprocc_some_text(os.path.join(path_to_pdfs, f"{i + 1}.pdf"))
             pdf = add_vectors_to_chunks(pdf)
             for j in tqdm(range(len(pdf))):
-                text_chunks = []
-                vector_chunks = []
-                text_chunks.append(pdf[j]['sents_chunks'])
-                vector_chunks.append(pdf[j]['vectors'])
+                text_chunks = pdf[j]['sents_chunks']
+                vector_chunks = pdf[j]['vectors']
                 df['text'].append(text_chunks)
                 df['vectors'].append(vector_chunks)
-        
-            PostgreDB.insert_data(self, df)
+
+        self.insert_data(df)
+
+    def count_values(self):
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "SELECT COUNT(*) FROM TextVectors;"
+        )
+        row_count = cursor.fetchone()[0]
+        cursor.close()
+        return row_count
+
+###TEST PLACE
+###DONT USE THIS CODE IF IT DONT HAVE "DONE AND READY FOR PROD"
