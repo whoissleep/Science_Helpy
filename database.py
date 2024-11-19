@@ -1,4 +1,3 @@
-import faiss
 import psycopg2
 import numpy as np
 from read_and_preprocc_pdf import add_vectors_to_chunks, read_and_preprocc_some_text
