@@ -58,7 +58,7 @@ def read_and_preprocc_some_text(path_to_pdf: str, num_of_chunks: int=5) -> list[
     pdf_chunks = []
 
     for number_of_page, page in tqdm(enumerate(pdf)):
-        text = formatting_text(page.get_text())
+        text = formatting_text(page.get_text()).lower()
         all_info_of_pdf.append({
             "page_number": number_of_page,
             "page_word_counts": len(text.split(" ")),

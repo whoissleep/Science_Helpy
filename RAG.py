@@ -1,12 +1,9 @@
-import os
 import faiss
 import pandas as pd
 import numpy as np
 from database import PostgreDB
 from vectorizer import Vectorizer
 from dotenv import load_dotenv
-import torch
-from torch.nn.functional import cosine_similarity
 
 load_dotenv()
 
@@ -29,9 +26,12 @@ class RAG:
         distances, indices = index.search(vec_of_text_np, k=5)
 
         # for i, idx in enumerate(indices[0]):
-        #     print(f"Document {idx}: Distance = {distances[0][i]}") for debug
+        #     print(f"Document {idx}: Distance = {distances[0][i]}")
         #     print(f"Text {idx}: {data[0].iloc[idx]}")
         
-        result = list(data[0].iloc[[indices[0][0]]])[0]
+        result = []
+        for i in range(len(indices[0])):
+            rag_text = list(data[0].iloc[[indices[0][i]]])[0]
+            result.append(rag_text[0])
 
-        return result[0]
+        return result

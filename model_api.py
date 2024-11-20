@@ -29,11 +29,11 @@ class ChatModel:
         self.client = InferenceClient(api_key=api_key)
         self.model_id = model_id
         self.messages_template = [
-            {"role": "system", "content": "Ты - профессиональный специалист, который помогает пользователю с исследованием статей. Отвечай на то, что они хотят, основываясь на контексте: {rag_context}"},
+            {"role": "system", "content": "You are a professional specialist who helps the user with the research of articles. Answer what they want based on the context: {rag_context}"},
             {"role": "user", "content": "{context}"}
         ]
 
-    def send_message(self, text, rag_context=''):
+    def send_message(self, context, rag_context):
         """
         Send a message to the model.
 
@@ -51,14 +51,14 @@ class ChatModel:
         """
         messages = [
             {"role": "system", "content": self.messages_template[0]["content"].format(rag_context=rag_context)},
-            {"role": "user", "content": self.messages_template[1]["content"].format(context=text)}
+            {"role": "user", "content": self.messages_template[1]["content"].format(context=context)}
         ]
 
         stream = self.client.chat.completions.create(
             model=self.model_id,
             messages=messages,
-            temperature=0.7,
-            max_tokens=512,
+            temperature=0.0,
+            max_tokens=1024,
             top_p=0.6,
             stream=True
         )

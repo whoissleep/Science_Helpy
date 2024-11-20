@@ -4,8 +4,6 @@ from vectorizer import Vectorizer
 from model_api import ChatModel
 from dotenv import load_dotenv
 import os
-from tqdm.auto import tqdm
-import pandas as pd
 from RAG import RAG
 
 def main():
@@ -23,8 +21,11 @@ def main():
         database.add_to_db(num_of_docs)
 
     rag = RAG(database=database, vectorizer=vectorizer)
-    context = rag.return_context(text="Attention is all you need")
-#TODO добавить текст из рага в ллмку и сделать вывод
+
+    uesr_message = input()
+    rag_context = rag.return_context(text=uesr_message)
+    model_answer = chat_model.send_message(context=uesr_message, rag_context=rag_context)
+    print(model_answer)
 
 if __name__ == "__main__":
     load_dotenv()
